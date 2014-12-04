@@ -1,0 +1,1 @@
+/home/wzhou/workspaceJava/DroidBench/apk/AndroidSpecific_PrivateDataLeak1.apk /opt/TOOLS/android-sdk/platforms/

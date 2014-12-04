@@ -43,6 +43,7 @@ import soot.jimple.infoflow.android.resources.ARSCFileParser.AbstractResource;
 import soot.jimple.infoflow.android.resources.ARSCFileParser.StringResource;
 import soot.jimple.infoflow.android.resources.LayoutControl;
 import soot.jimple.infoflow.android.resources.LayoutFileParser;
+import soot.jimple.infoflow.android.axml.*;
 import soot.jimple.infoflow.config.IInfoflowConfig;
 import soot.jimple.infoflow.data.pathBuilders.DefaultPathBuilderFactory;
 import soot.jimple.infoflow.data.pathBuilders.DefaultPathBuilderFactory.PathBuilder;
@@ -253,6 +254,71 @@ public class SetupApplication {
 		this.appPackageName = processMan.getPackageName();
 		this.entrypoints = processMan.getEntryPointClasses();
 		
+		/******Begin: Added By W.Zhou for Debugging Purpose *************/
+		System.out.println("==== Meta Information about app - " + appPackageName + ":====");
+		
+		System.out.println(processMan.getManifest().toString());
+		System.out.println(processMan.getApplication().toString());
+		AXmlNode appNode = processMan.getApplication();
+		if (appNode.hasAttribute("android:label")) {
+			String labelStr = (String)appNode.getAttribute("android:label").getValue();
+			System.out.println("We have android:label - " + labelStr);
+		}
+		int labelId = 0;
+		if (appNode.hasAttribute("label")) {
+			labelId = (Integer)appNode.getAttribute("label").getValue();
+			System.out.println("We have label - " + labelId);
+		}
+		
+		System.out.println(processMan.getAXml().toString());
+		
+		System.out.println("====  Activities ====");
+		for (AXmlNode axnode: processMan.getActivities()) {
+			System.out.println(axnode.toString());
+			for (AXmlNode childnode: axnode.getChildren()) {
+				System.out.println("\t" + childnode.toString());
+				for (AXmlNode sunzinode: childnode.getChildren())
+					System.out.println("\t\t" + sunzinode.toString());	
+			}
+		}
+		
+		System.out.println("====  Services ====");
+		for (AXmlNode axnode: processMan.getServices()) {
+			System.out.println(axnode.toString());
+			for (AXmlNode childnode: axnode.getChildren()) {
+				System.out.println("\t" + childnode.toString());
+				for (AXmlNode sunzinode: childnode.getChildren())
+					System.out.println("\t\t" + sunzinode.toString());	
+			}
+		}
+		
+		System.out.println("====  Receivers ====");
+		for (AXmlNode axnode: processMan.getReceivers()) {
+			System.out.println(axnode.toString());
+			for (AXmlNode childnode: axnode.getChildren()) {
+				System.out.println("\t" + childnode.toString());
+				for (AXmlNode sunzinode: childnode.getChildren())
+					System.out.println("\t\t" + sunzinode.toString());	
+			}
+		}
+		
+		System.out.println("====  Providers ====");
+		for (AXmlNode axnode: processMan.getProviders()) {
+			System.out.println(axnode.toString());
+			for (AXmlNode childnode: axnode.getChildren()) {
+				System.out.println("\t" + childnode.toString());
+				for (AXmlNode sunzinode: childnode.getChildren())
+					System.out.println("\t\t" + sunzinode.toString());	
+			}
+		}
+		System.out.println("Requested Permissions: " + processMan.getPermissions().toString());
+		
+		System.out.println("=====Entry points we found so far====");
+		for (String ent: entrypoints)
+			System.out.println(ent);
+		System.out.println("========");
+		/******End: Added By W.Zhou for Debugging Purpose *************/
+		
 		// Parse the resource file
 		long beforeARSC = System.nanoTime();
 		ARSCFileParser resParser = new ARSCFileParser();
@@ -268,6 +334,15 @@ public class SetupApplication {
 		sinks = new HashSet<AndroidMethod>(sinkMethods);
 		
 		System.out.println("Entry point calculation done.");
+
+		AbstractResource resource = resParser.findResource((int)labelId);
+		if (resource instanceof StringResource) {
+			StringResource strRes = (StringResource) resource;
+			System.out.println("Label's name is " + strRes.getValue());
+		}
+		// ZW: don't continue...
+		// System.exit(0);
+		
 		
 		// Clean up everything we no longer need
 		soot.G.reset();
@@ -441,6 +516,7 @@ public class SetupApplication {
 		switch (callgraphAlgorithm) {
 			case AutomaticSelection:
 				Options.v().setPhaseOption("cg.spark", "on");
+				Options.v().setPhaseOption("cg.spark", "verbose:true");  // added By ZW
 				break;
 			case RTA:
 				Options.v().setPhaseOption("cg.spark", "on");
@@ -454,7 +530,7 @@ public class SetupApplication {
 				throw new RuntimeException("Invalid callgraph algorithm");
 		}
 
-		// Load whetever we need
+		// Load whatever we need
 		Scene.v().loadNecessaryClasses();
 	}
 

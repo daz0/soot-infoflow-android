@@ -22,12 +22,14 @@ public class CFG {
 	public static void main(String[] args) {
 
 		// TODO Auto-generated method stub
-
-		SetupApplication app = new SetupApplication("/opt/TOOLS/android-sdk/platforms/","/home/wzhou/workspaceJava/DroidBench/apk/AndroidSpecific_PrivateDataLeak1.apk");
+		String droidPlatform = args[1];
+		String apk2bAnalyzed = args[0];
+		String srcSinkFile = args[2];
+		SetupApplication app = new SetupApplication(droidPlatform, apk2bAnalyzed);
 
 		try {
 
-			app.calculateSourcesSinksEntrypoints("/home/wzhou/workspaceJava/soot-infoflow-android/SourcesAndSinks.txt");
+			app.calculateSourcesSinksEntrypoints(srcSinkFile);
 
 		} catch (IOException e) {
 
@@ -47,9 +49,9 @@ public class CFG {
 
 		Options.v().set_src_prec(Options.src_prec_apk);
 
-		Options.v().set_process_dir(Collections.singletonList("/home/wzhou/workspaceJava/DroidBench/apk/AndroidSpecific_PrivateDataLeak1.apk"));
+		Options.v().set_process_dir(Collections.singletonList(apk2bAnalyzed));
 
-		Options.v().set_android_jars("/opt/TOOLS/android-sdk/platforms/");
+		Options.v().set_android_jars(droidPlatform);
 
 		Options.v().set_whole_program(true);
 
